@@ -2,6 +2,8 @@ from simulation import Simulation
 import numpy as np
 import pandas as pd
 from bokeh.plotting import figure, output_file, save, show
+from _datetime import datetime
+
 if __name__ == "__main__":
     df = pd.DataFrame(columns=['phi', 'u'])
     #todo: put to toml
@@ -42,16 +44,20 @@ if __name__ == "__main__":
     sim.set_controls('fcs/throttle-cmd-norm', 1)
     i = 0
     state = ""
-    while result and sim.jsbsim.get_sim_time() <= 30:
-        print(i)
+    before = datetime.now()
+    while result and sim.jsbsim.get_sim_time() <= 300:
+        #print(i)
         state = sim.get_state()
         if i%5==0:
             sim.set_controls('fcs/aileron-cmd-norm',_innerLoopAileron(np.deg2rad(10), state['phi'], state['p'], sim.jsbsim.get_property_value('fcs/aileron-cmd-norm')))
         sim.run()
-        print(np.rad2deg(state['phi']))
-        df = df.append({'u': state['u'], 'phi': np.rad2deg(state['phi'])}, ignore_index=True)
+        #print(np.rad2deg(state['phi']))
+        #df = df.append({'u': state['u'], 'phi': np.rad2deg(state['phi'])}, ignore_index=True)
 
         i += 1
+    after = datetime.now()
+    dt = (after - before)
+    print(dt)
     sim.close()
     plot(df)
 
